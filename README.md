@@ -1,4 +1,4 @@
-# REHBER (رہبر)
+# REHBER 
 ### AI Personalized Learning Platform for Rural Communities
 **Mission:** MISSION-06 • Software • Education  
 **Architecture:** Offline-First → Low-Bandwidth → Online-Sync
