@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RehberProtocolSchemas",
+  "description": "Schemas for SMS protocol and offline sync synchronization packets",
+  "definitions": {
+    "SmsFormat": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+#(REG|QZ|ASK|PGR|ACK|RES|ANS|ERR)#.*$",
+      "examples": [
+        "STU101#REG#Amina Khan|6|urdu",
+        "STU101#QZ#QZ_BIO_01|1:A,2:C,3:B",
+        "STU101#ASK#Why is chlorophyll green?",
+        "STU101#PGR#MOD_BIO_01|85|1200"
+      ]
+    },
+    "SyncBatchRequest": {
+      "type": "object",
+      "required": ["student_id", "records"],
+      "properties": {
+        "student_id": { "type": "string" },
+        "client_timestamp": { "type": "string", "format": "date-time" },
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "operation_type", "payload", "created_at"],
+            "properties": {
+              "id": { "type": "string" },
+              "operation_type": { "type": "string", "enum": ["REG", "PROGRESS", "QUIZ", "AI_CHAT"] },
+              "payload": { "type": "object" },
+              "created_at": { "type": "string", "format": "date-time" },
+              "retry_count": { "type": "integer", "default": 0 }
+            }
+          }
+        }
+      }
+    },
+    "SyncBatchResponse": {
+      "type": "object",
+      "required": ["status", "processed_ids", "server_timestamp"],
+      "properties": {
+        "status": { "type": "string", "enum": ["OK", "PARTIAL", "FAILED"] },
+        "processed_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "failed_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "conflicts": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "curriculum_version": { "type": "string" },
+        "server_timestamp": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "RuralLearn AI - Offline-First Learning Platform",
+  "description": "AI personalized learning platform for rural communities with offline learning, local AI engine, voice tutor, community hub sync, and teacher classroom analytics.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

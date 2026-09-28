@@ -1,0 +1,72 @@
+import type { Metadata } from 'next';
+import './globals.css';
+import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Rehber Educator Portal',
+  description: 'AI Personalized Learning & Offline Sync Supervision Platform for Rural Schools',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className="min-h-screen bg-slate-50 text-slate-900">
+        {/* Top Header */}
+        <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-3">
+                <div className="w-9 h-9 rounded-lg bg-sky-500 flex items-center justify-center font-bold text-white shadow-md">
+                  R
+                </div>
+                <div>
+                  <span className="text-xl font-bold tracking-tight">REHBER</span>
+                  <span className="ml-2 text-xs bg-sky-950 text-sky-300 px-2 py-0.5 rounded border border-sky-800">
+                    Teacher Portal
+                  </span>
+                </div>
+              </div>
+
+              <div className="hidden md:flex items-center space-x-1">
+                <Link href="/" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition">
+                  Dashboard
+                </Link>
+                <Link href="/students" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition">
+                  Students
+                </Link>
+                <Link href="/interventions" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition">
+                  Learning Bands & Interventions
+                </Link>
+                <Link href="/curriculum" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition">
+                  Curriculum
+                </Link>
+                <Link href="/sms-gateway" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition">
+                  SMS Gateway
+                </Link>
+                <Link href="/sync-monitor" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition">
+                  Sync Monitor
+                </Link>
+              </div>
+
+              <div className="flex items-center space-x-3 text-xs text-slate-300">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-950 text-emerald-300 border border-emerald-800">
+                  <span className="w-1.5 h-1.5 mr-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                  GCS Chak 42 • Online
+                </span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content Area */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {children}
+        </main>
+      </body>
+    </html>
+  );
+}
