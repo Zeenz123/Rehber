@@ -44,6 +44,9 @@ export default function RootLayout({
                 <Link href="/curriculum" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition">
                   Curriculum
                 </Link>
+                <Link href="/admin" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition">
+                  Admin
+                </Link>
                 <Link href="/sms-gateway" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition">
                   SMS Gateway
                 </Link>

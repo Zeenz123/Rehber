@@ -6,6 +6,8 @@ from app.core.database import init_db
 from app.api import (
     auth,
     students,
+    teachers,
+    admin,
     curriculum,
     lessons,
     assessments,
@@ -44,6 +46,8 @@ app.add_middleware(
 # Include modular API routers
 app.include_router(auth.router, prefix=settings.API_PREFIX)
 app.include_router(students.router, prefix=settings.API_PREFIX)
+app.include_router(teachers.router, prefix=settings.API_PREFIX)
+app.include_router(admin.router, prefix=settings.API_PREFIX)
 app.include_router(curriculum.router, prefix=settings.API_PREFIX)
 app.include_router(lessons.router, prefix=settings.API_PREFIX)
 app.include_router(assessments.router, prefix=settings.API_PREFIX)
@@ -54,14 +58,27 @@ app.include_router(sms_webhook.router, prefix=settings.API_PREFIX)
 app.include_router(analytics.router, prefix=settings.API_PREFIX)
 
 
+from sqlalchemy import text
+from app.core.database import AsyncSessionLocal
+
 @app.get("/health")
 async def health_check():
-    return {
-        "status": "healthy",
-        "app": settings.APP_NAME,
-        "environment": settings.ENVIRONMENT,
-        "version": "1.0.0"
-    }
+    try:
+        async with AsyncSessionLocal() as session:
+            await session.execute(text("SELECT 1"))
+        return {
+            "status": "ok",
+            "database": "connected",
+            "app": settings.APP_NAME,
+            "environment": settings.ENVIRONMENT,
+            "version": "1.0.0"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "database": "disconnected",
+            "details": str(e)
+        }
 
 
 @app.get("/")

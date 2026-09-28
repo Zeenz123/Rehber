@@ -1099,6 +1099,16 @@ class LocalDatabase {
     return this.getItem<Subject[]>('subjects', INITIAL_SUBJECTS);
   }
 
+  addSubject(subject: Subject): void {
+    const subjects = this.getSubjects();
+    subjects.push(subject);
+    this.setItem('subjects', subjects);
+    if (this.idb.isAvailable) {
+      this.idb.put(IDB_STORES.SYSTEM_STATE, { key: 'subjects_cache', data: subjects });
+    }
+    this.notifyListeners();
+  }
+
   getTopics(subjectId?: string): Topic[] {
     const all = this.getItem<Topic[]>('topics', INITIAL_TOPICS);
     return subjectId ? all.filter((t) => t.subjectId === subjectId) : all;

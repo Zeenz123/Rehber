@@ -28,6 +28,15 @@ export const INITIAL_SUBJECTS: Subject[] = [
     description: 'Build practical vocabulary, sentence structure, storytelling, and conversational confidence.',
     topicsCount: 2,
   },
+  {
+    id: 'digital',
+    name: 'Digital Literacy',
+    code: 'DIG',
+    icon: 'Laptop',
+    color: 'from-purple-500 to-fuchsia-600',
+    description: 'Learn basic computer skills, internet safety, and using technology for daily tasks.',
+    topicsCount: 0,
+  },
 ];
 
 export const INITIAL_TOPICS: Topic[] = [
@@ -120,6 +129,15 @@ export const INITIAL_TOPICS: Topic[] = [
     level: 'intermediate',
     order: 2,
     lessonsCount: 3,
+  },
+  {
+    id: 'dig-basics',
+    subjectId: 'digital',
+    title: 'Computer Basics',
+    description: 'Learn about computers, smartphones, and safe internet browsing.',
+    level: 'beginner',
+    order: 1,
+    lessonsCount: 1,
   },
 ];
 
@@ -1333,6 +1351,35 @@ export const INITIAL_LESSONS: Lesson[] = [
     offlineAvailable: true,
     language: 'en',
   },
+  {
+    id: 'lesson-dig-1',
+    topicId: 'dig-basics',
+    subjectId: 'digital',
+    title: 'Introduction to Computers',
+    description: 'Understand the basics of computers and smartphones.',
+    level: 'beginner',
+    difficulty: 1,
+    estimatedMinutes: 10,
+    explanation: 'A quick intro to digital devices.',
+    steps: [
+      {
+        stepNumber: 1,
+        text: 'A computer is a machine that helps us process information, learn, and communicate.',
+        explanation: 'Like a smart assistant, it can calculate, store books, and connect us to the internet.',
+      },
+    ],
+    workedExamples: [
+      {
+        question: 'What is a smartphone?',
+        stepByStepSolution: ['It is a small computer that fits in your pocket.'],
+        result: 'A portable computer.',
+        tip: 'Smartphones do what computers do, but in a smaller size.',
+      },
+    ],
+    practiceQuestions: ['What does a computer do?', 'What is the internet?'],
+    offlineAvailable: true,
+    language: 'en',
+  }
 ];
 
 // Helper to generate 10 questions per topic (Total 100 questions)
@@ -3456,4 +3503,18 @@ export const INITIAL_QUESTIONS: Question[] = [
     difficulty: 'advanced',
     subtopic: 'vocab_synonyms',
   },
+  {
+    id: 'q-dig-1',
+    lessonId: 'lesson-dig-1',
+    topicId: 'dig-basics',
+    subjectId: 'digital',
+    type: 'multiple_choice',
+    text: 'What is a smartphone?',
+    options: ['A type of radio', 'A pocket-sized computer', 'A television', 'A calculator'],
+    correctAnswer: 'A pocket-sized computer',
+    explanation: 'A smartphone is a small, portable computer with phone capabilities.',
+    hint: 'It fits in your pocket and is smart.',
+    difficulty: 'beginner',
+    subtopic: 'basics',
+  }
 ];

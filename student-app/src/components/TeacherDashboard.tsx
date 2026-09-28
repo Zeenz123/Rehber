@@ -17,8 +17,10 @@ import {
 } from 'lucide-react';
 import { TeacherStudentView, ClassInsight } from '../types';
 import { OFFLINE_STUDENTS_DATA, OFFLINE_CLASS_INSIGHTS } from '../services/teacherOfflineData';
+import { AdminPanelModal } from './AdminPanelModal';
 
 export const TeacherDashboard: React.FC = () => {
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [students, setStudents] = useState<TeacherStudentView[]>(() => {
     try {
       const saved = localStorage.getItem('rurallearn_teacher_students');
@@ -106,6 +108,12 @@ export const TeacherDashboard: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsAdminModalOpen(true)}
+              className="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors border border-indigo-400"
+            >
+              Admin Settings
+            </button>
             <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3 py-1.5 rounded-full">
               Solar Hub Sync: Active
             </span>
@@ -422,6 +430,8 @@ export const TeacherDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      <AdminPanelModal isOpen={isAdminModalOpen} onClose={() => setIsAdminModalOpen(false)} />
     </div>
   );
 };

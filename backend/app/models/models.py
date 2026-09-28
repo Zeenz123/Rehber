@@ -238,3 +238,18 @@ class LearningRecommendation(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     student = relationship("Student", back_populates="recommendations")
+
+class StudentRegistry(Base):
+    __tablename__ = "student_registry"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    government_school_student_id = Column(String(100), unique=True, index=True, nullable=False)
+    school_id = Column(String(36), ForeignKey("schools.id"), nullable=True)
+    student_name = Column(String(255), nullable=False)
+    grade = Column(Integer, default=6)
+    section = Column(String(10), nullable=True)
+    language = Column(String(50), default="urdu")
+    status = Column(String(20), default="ACTIVE")
+    linked_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

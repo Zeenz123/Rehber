@@ -17,6 +17,7 @@ import {
   Users,
   MoreVertical,
   X,
+  Laptop,
 } from 'lucide-react';
 import { localDb } from '../services/localDb';
 import { t } from '../services/i18n';
@@ -121,6 +122,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         return Leaf;
       case 'BookOpen':
         return BookOpen;
+      case 'Laptop':
+        return Laptop;
       default:
         return Sparkles;
     }
@@ -152,10 +155,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <button
                     onClick={() => setIsJoinModalOpen(true)}
                     className="bg-white/20 hover:bg-white/35 active:scale-95 text-white text-xs font-bold px-2.5 py-1 rounded-xl backdrop-blur-sm transition-all flex items-center gap-1 border border-white/25 shadow-2xs cursor-pointer"
-                    title="Join with any name or switch student"
+                    title="Add a new user or switch student"
                   >
                     <UserPlus className="w-3.5 h-3.5" />
-                    <span>Switch Learner</span>
+                    <span>Add / Switch User</span>
                   </button>
                 </div>
                 <p className="text-amber-100 text-xs font-medium">
@@ -374,7 +377,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             return (
               <div
                 key={subj.id}
-                onClick={() => onStartQuiz(subj.id === 'math' ? 'math-fractions' : subj.id === 'science' ? 'sci-plants' : 'eng-grammar')}
+                onClick={() => {
+                  let targetTopic = 'eng-vocab';
+                  if (subj.id === 'math') targetTopic = 'math-fractions';
+                  if (subj.id === 'science') targetTopic = 'sci-plants';
+                  if (subj.id === 'english') targetTopic = 'eng-vocab';
+                  if (subj.id === 'digital') targetTopic = 'dig-basics';
+                  onStartQuiz(targetTopic);
+                }}
                 className="bg-slate-50 hover:bg-orange-50/50 p-4 rounded-2xl border border-slate-200/60 transition-all cursor-pointer group"
               >
                 <div className="flex items-center justify-between mb-2">

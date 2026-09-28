@@ -17,8 +17,8 @@ interface SmsLogItem {
 }
 
 export default function SmsGatewayPage() {
-  const [testPayload, setTestPayload] = useState('STU101#ASK#Why do plants need sunlight?');
-  const [teacherTargetStudent, setTeacherTargetStudent] = useState('STU101');
+  const [testPayload, setTestPayload] = useState('GOV-SCH-001-STU-0001#ASK#Why do plants need sunlight?');
+  const [teacherTargetStudent, setTeacherTargetStudent] = useState('GOV-SCH-001-STU-0001');
   const [teacherMessage, setTeacherMessage] = useState('Great progress on Fractions! Practice Module 2 next.');
   const [teacherSending, setTeacherSending] = useState(false);
   const [ecosystemConnected, setEcosystemConnected] = useState(true);
@@ -30,7 +30,7 @@ export default function SmsGatewayPage() {
       sender: '+923011111101',
       studentId: 'STU101',
       actionCode: 'ASK',
-      rawInbound: 'STU101#ASK#What is photosynthesis?',
+      rawInbound: 'GOV-SCH-001-STU-0001#ASK#What is photosynthesis?',
       rawOutbound: 'STU101#ANS#Plants make food using sunlight, water, and CO2, releasing oxygen.',
       status: 'PROCESSED',
       timestamp: '12:45:10 PM',
@@ -40,7 +40,7 @@ export default function SmsGatewayPage() {
       sender: '+923011111102',
       studentId: 'STU102',
       actionCode: 'QZ',
-      rawInbound: 'STU102#QZ#QZ_MATH_01|Q_MATH_001:A,Q_MATH_002:B',
+      rawInbound: 'GOV-SCH-001-STU-0001#QZ#QZ_MATH_01|Q_MATH_001:A,Q_MATH_002:B',
       rawOutbound: 'STU102#RES#QZ|Score:100%|Mastery:+0.16|Next:MOD_MATH_02',
       status: 'PROCESSED',
       timestamp: '12:30:05 PM',
@@ -146,8 +146,8 @@ export default function SmsGatewayPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from_number: '+923001234567',
-          body: testPayload,
+          sender: '+923001234567',
+          message: testPayload,
         }),
       });
 
@@ -337,19 +337,19 @@ export default function SmsGatewayPage() {
             <div className="flex flex-wrap gap-2 pt-1 text-xs">
               <span className="text-slate-400 font-medium">Presets:</span>
               <button
-                onClick={() => setTestPayload('STU101#ASK#Why is gravity important?')}
+                onClick={() => setTestPayload('GOV-SCH-001-STU-0001#ASK#Why is gravity important?')}
                 className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-mono text-[11px]"
               >
                 ASK: Gravity
               </button>
               <button
-                onClick={() => setTestPayload('STU102#QZ#QZ_MATH_01|Q_MATH_001:A,Q_MATH_002:B')}
+                onClick={() => setTestPayload('GOV-SCH-001-STU-0001#QZ#QZ_MATH_01|Q_MATH_001:A,Q_MATH_002:B')}
                 className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-mono text-[11px]"
               >
                 QZ: Math Quiz
               </button>
               <button
-                onClick={() => setTestPayload('STU103#REG#Anita Devi|7|urdu')}
+                onClick={() => setTestPayload('GOV-SCH-001-STU-0001#REG#Anita Devi|7|urdu')}
                 className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-mono text-[11px]"
               >
                 REG: Register
@@ -421,3 +421,4 @@ export default function SmsGatewayPage() {
     </div>
   );
 }
+

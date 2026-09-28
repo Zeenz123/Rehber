@@ -4,10 +4,59 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from app.core.database import get_db
-from app.models.models import Subject, Module, Lesson, Question
-from app.schemas.schemas import SubjectResponse, ModuleResponse
+from app.models.models import Subject, Module, Lesson, Question, User
+from app.schemas.schemas import SubjectResponse, ModuleResponse, SubjectCreate
+from app.api.deps import require_admin
 
 router = APIRouter(prefix="/curriculum", tags=["Curriculum"])
+
+from fastapi.responses import JSONResponse
+
+@router.post("/subjects")
+async def create_subject(data: SubjectCreate, admin: User = Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    # Check duplicate ID
+    res = await db.execute(select(Subject).where(Subject.id == data.id))
+    if res.scalar_one_or_none():
+        return JSONResponse(
+            status_code=409,
+            content={"success": False, "error": {"code": "DUPLICATE_SUBJECT", "message": "A subject with this ID already exists."}}
+        )
+
+    # Check duplicate Code
+    res_code = await db.execute(select(Subject).where(Subject.code == data.code))
+    if res_code.scalar_one_or_none():
+        return JSONResponse(
+            status_code=409,
+            content={"success": False, "error": {"code": "DUPLICATE_SUBJECT_CODE", "message": "A subject with this code already exists."}}
+        )
+
+    subject = Subject(
+        id=data.id,
+        code=data.code,
+        name=data.name,
+        grade=data.grade,
+        description=data.description,
+        icon=data.icon
+    )
+    db.add(subject)
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        return JSONResponse(status_code=500, content={"success": False, "error": {"code": "DB_ERROR", "message": str(e)}})
+    
+    return {
+        "success": True,
+        "message": "Subject created successfully",
+        "subject": {
+            "id": subject.id,
+            "subject_id": subject.id,
+            "subject_code": subject.code,
+            "subject_name": subject.name,
+            "description": subject.description,
+            "icon": subject.icon
+        }
+    }
 
 
 @router.get("/subjects", response_model=List[SubjectResponse])
@@ -87,3 +136,4 @@ async def get_curriculum_bundle(grade: int = 6, db: AsyncSession = Depends(get_d
         ]
     }
     return bundle
+

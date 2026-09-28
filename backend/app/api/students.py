@@ -4,52 +4,83 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.core.database import get_db
-from app.models.models import Student, StudentProgress, StudentMastery, LearningRecommendation
-from app.schemas.schemas import StudentCreate, StudentResponse
+from app.models.models import Student, StudentProgress, StudentMastery, LearningRecommendation, QuizAttempt, Subject
+from app.api.deps import require_student
 
 router = APIRouter(prefix="/students", tags=["Students"])
 
+@router.get("/me")
+async def get_me(student: Student = Depends(require_student)):
+    return {
+        "id": student.id,
+        "name": student.name,
+        "grade": student.grade,
+        "language": student.language,
+        "overall_mastery": student.overall_mastery
+    }
 
-@router.post("/", response_model=StudentResponse)
-async def create_student(data: StudentCreate, db: AsyncSession = Depends(get_db)):
-    res = await db.execute(select(Student).where(Student.id == data.id))
-    existing = res.scalar_one_or_none()
-    if existing:
-        existing.name = data.name
-        existing.grade = data.grade
-        existing.language = data.language
-        existing.phone_number = data.phone_number
-        await db.commit()
-        await db.refresh(existing)
-        return existing
+@router.get("/me/progress")
+async def get_my_progress(student: Student = Depends(require_student), db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(StudentProgress).where(StudentProgress.student_id == student.id))
+    progress = res.scalars().all()
+    return progress
 
-    student = Student(
-        id=data.id,
-        name=data.name,
-        grade=data.grade,
-        language=data.language,
-        school_id=data.school_id,
-        phone_number=data.phone_number,
-        learning_band="ON_TRACK",
-        overall_mastery=0.5,
-        theta_ability=0.0
+@router.get("/me/mastery")
+async def get_my_mastery(student: Student = Depends(require_student), db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(StudentMastery).where(StudentMastery.student_id == student.id))
+    mastery = res.scalars().all()
+    return mastery
+
+@router.get("/me/recommendations")
+async def get_my_recommendations(student: Student = Depends(require_student), db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(LearningRecommendation).where(LearningRecommendation.student_id == student.id))
+    recs = res.scalars().all()
+    return recs
+
+@router.get("/me/curriculum")
+async def get_my_curriculum(student: Student = Depends(require_student), db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(Subject).where(Subject.grade == student.grade))
+    subjects = res.scalars().all()
+    return subjects
+
+from pydantic import BaseModel
+class QuizSubmission(BaseModel):
+    quiz_id: str
+    score: float
+    answers_json: dict
+
+@router.post("/me/quiz")
+async def submit_quiz(data: QuizSubmission, student: Student = Depends(require_student), db: AsyncSession = Depends(get_db)):
+    attempt = QuizAttempt(
+        student_id=student.id,
+        quiz_id=data.quiz_id,
+        score=data.score,
+        answers_json=data.answers_json,
+        transport="HTTPS"
     )
-    db.add(student)
+    db.add(attempt)
+    # Adaptive learning mock update
+    student.overall_mastery = min(1.0, student.overall_mastery + (data.score * 0.01))
     await db.commit()
-    await db.refresh(student)
-    return student
+    return {"success": True, "message": "Quiz submitted successfully"}
 
+class ProgressSubmission(BaseModel):
+    module_id: str
+    lesson_id: str = None
+    status: str
+    score: float
+    time_spent_sec: int
 
-@router.get("/{student_id}", response_model=StudentResponse)
-async def get_student(student_id: str, db: AsyncSession = Depends(get_db)):
-    res = await db.execute(select(Student).where(Student.id == student_id))
-    student = res.scalar_one_or_none()
-    if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
-    return student
-
-
-@router.get("/", response_model=List[StudentResponse])
-async def list_students(limit: int = 50, db: AsyncSession = Depends(get_db)):
-    res = await db.execute(select(Student).limit(limit))
-    return res.scalars().all()
+@router.post("/me/progress")
+async def submit_progress(data: ProgressSubmission, student: Student = Depends(require_student), db: AsyncSession = Depends(get_db)):
+    progress = StudentProgress(
+        student_id=student.id,
+        module_id=data.module_id,
+        lesson_id=data.lesson_id,
+        status=data.status,
+        score=data.score,
+        time_spent_sec=data.time_spent_sec
+    )
+    db.add(progress)
+    await db.commit()
+    return {"success": True, "message": "Progress updated"}

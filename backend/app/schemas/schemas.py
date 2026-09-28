@@ -250,3 +250,18 @@ class SyncRecordItem(BaseModel):
     ack_code: Optional[str] = None
     synced_at: datetime
 
+
+class SubjectCreate(BaseModel):
+    id: str
+    code: str
+    name: str
+    grade: int = 6
+    description: Optional[str] = None
+    icon: str = 'book'
+
+class UserCreate(BaseModel):
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
+    password: str
+    name: str
+    role: str = 'TEACHER'
