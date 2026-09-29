@@ -418,6 +418,10 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({
           </button>
         </div>
       </div>
+
+      <AdBanner className="mt-6 mb-4" />
     </div>
   );
 };
+
+
