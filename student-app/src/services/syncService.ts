@@ -143,7 +143,7 @@ class SyncService {
             timestamp: new Date().toISOString(),
           };
 
-          const res = await fetch('/api/sync/upload', {
+          const res = await fetch(`${apiBase}/api/sync/upload`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
