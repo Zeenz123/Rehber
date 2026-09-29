@@ -17,6 +17,7 @@ import { HubSyncScreen } from './components/HubSyncScreen';
 import { TeacherDashboard } from './components/TeacherDashboard';
 import { DiagnosticModal } from './components/DiagnosticModal';
 import { GuidedDemoModal } from './components/GuidedDemoModal';
+import { LoginScreen } from './components/LoginScreen';
 import { syncService } from './services/syncService';
 import { localDb } from './services/localDb';
 import { NetworkStatus } from './types';
@@ -24,6 +25,7 @@ import { initLanguage } from './services/i18n';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<string>('home');
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!localStorage.getItem('student_token'));
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus>('online');
   const [pendingSyncCount, setPendingSyncCount] = useState<number>(0);
 
@@ -89,6 +91,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-900 selection:bg-orange-500 selection:text-white">
+      {!isLoggedIn ? (
+        <LoginScreen onLoginSuccess={(id, token) => setIsLoggedIn(true)} />
+      ) : (
+        <>
       {/* Tablet Frame Container Wrapper */}
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
@@ -208,6 +214,12 @@ export default function App() {
         onOpenTutor={handleOpenTutorWithPrompt}
         onOpenDiagnostic={() => setIsDiagnosticOpen(true)}
       />
+      </>
+      )}
     </div>
   );
 }
+
+
+
+
