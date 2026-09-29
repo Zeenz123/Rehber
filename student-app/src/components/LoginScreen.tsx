@@ -102,7 +102,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
         </div>
 
         <button
-          onClick={(e) => { e.preventDefault(); onLoginSuccess('GOV-SCH-001-STU-0001', 'mock-google-token'); }}
+          onClick={async (e) => { e.preventDefault(); const email = prompt('Enter your Google Email (Must be @govschool.edu.pk)'); if (email) { try { const res = await fetch('http://localhost:8000/api/auth/google', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, role: 'STUDENT' }) }); if (!res.ok) { const data = await res.json(); alert(data.detail || 'Login failed'); return; } const data = await res.json(); localStorage.setItem('student_token', data.access_token); onLoginSuccess(data.student_id, data.access_token); } catch(err) { alert('Network Error'); } } }}
           className="w-full mt-6 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3.5 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-3 cursor-pointer"
         >
           <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
@@ -118,4 +118,5 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
     </div>
   );
 };
+
 
