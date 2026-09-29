@@ -31,6 +31,7 @@ export const JoinStudentModal: React.FC<JoinStudentModalProps> = ({
   const [students, setStudents] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [nameInput, setNameInput] = useState<string>('');
+  const [usernameInput, setUsernameInput] = useState<string>('');
   const [selectedGrade, setSelectedGrade] = useState<number>(7);
   const [selectedAvatar, setSelectedAvatar] = useState<string>('👦🏽');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -45,6 +46,7 @@ export const JoinStudentModal: React.FC<JoinStudentModalProps> = ({
       }
       setStudents(localDb.getAllStudents());
       setNameInput('');
+      setUsernameInput('');
       setErrorMsg(null);
       setSuccessMsg(null);
     }
@@ -55,16 +57,46 @@ export const JoinStudentModal: React.FC<JoinStudentModalProps> = ({
   const handleJoinNewStudent = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const trimmed = nameInput.trim();
+    const trimmedUsername = usernameInput.trim().toLowerCase();
+
     if (!trimmed) {
       setErrorMsg('Please enter a student name to join.');
+      return;
+    }
+    if (!trimmedUsername) {
+      setErrorMsg('Please enter a username for authorization.');
+      return;
+    }
+    if (trimmedUsername.length < 3) {
+      setErrorMsg('Username must be at least 3 characters long.');
+      return;
+    }
+    if (!/^[a-z0-9_]+$/.test(trimmedUsername)) {
+      setErrorMsg('Username can only contain letters, numbers, and underscores.');
+      return;
+    }
+
+    // Check username uniqueness among existing students on this tablet
+    const existing = students.find(
+      (s) => (s as any).username?.toLowerCase() === trimmedUsername
+    );
+    if (existing) {
+      setErrorMsg(`Username "${trimmedUsername}" is already taken. Pick another.`);
       return;
     }
 
     try {
       const result = localDb.joinAsStudent(trimmed, selectedGrade, selectedAvatar);
+      // Store the username alongside the user record in localStorage
+      const allStudents = localDb.getAllStudents();
+      const updatedStudents = allStudents.map((s) =>
+        s.id === result.user.id ? { ...s, username: trimmedUsername } : s
+      );
+      localStorage.setItem('rehber_all_students', JSON.stringify(updatedStudents));
+
       setCurrentUser(result.user);
       setStudents(localDb.getAllStudents());
-      setSuccessMsg(`Welcome, ${result.user.name}! Your personalized learning dashboard is ready.`);
+      setSuccessMsg(`Welcome, ${result.user.name} (@${trimmedUsername})! Your personalized learning dashboard is ready.`);
       if (onStudentChanged) {
         onStudentChanged(result.user, result.profile);
       }
@@ -169,6 +201,25 @@ export const JoinStudentModal: React.FC<JoinStudentModalProps> = ({
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
+              </div>
+
+              {/* Username field for authorization */}
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">
+                  Username <span className="text-orange-500">(required for authorized access)</span>:
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">@</span>
+                  <input
+                    type="text"
+                    value={usernameInput}
+                    onChange={(e) => setUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    placeholder="e.g. rishi_raj, aarav123"
+                    className="w-full pl-7 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white shadow-2xs font-mono"
+                    maxLength={20}
+                  />
+                </div>
+                <p className="text-[10px] text-slate-400 mt-1">Letters, numbers, and underscores only. Min 3 characters.</p>
               </div>
 
               {/* Class Grade & Avatar Selection Row */}
