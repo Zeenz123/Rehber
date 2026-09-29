@@ -96,3 +96,9 @@ async def root():
         "docs_url": "/docs",
         "health": "/health"
     }
+
+@app.get("/seed")
+async def trigger_seed():
+    import seed_data
+    await seed_data.seed()
+    return {"status": "success", "message": "Database seeded successfully!"}

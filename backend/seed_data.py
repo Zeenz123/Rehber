@@ -3,7 +3,8 @@ from datetime import datetime, timedelta
 from app.core.database import AsyncSessionLocal, init_db
 from app.models.models import (
     School, Teacher, Student, Subject, Module, Lesson,
-    Question, QuizAttempt, StudentProgress, StudentMastery
+    Question, QuizAttempt, StudentProgress, StudentMastery,
+    User, StudentRegistry
 )
 
 
@@ -19,6 +20,29 @@ async def seed():
 
         print("Seeding Rehber initial database...")
 
+        # 0. Create Auth Users
+        demo_password_hash = "41bd876b085d6031cb0e04de35b88d77f83a4ba39f879fee40805ac19e356023" # hash of 'demo-password'
+        
+        teacher_user = User(
+            id="USR-TEA-001",
+            email="teacher@rehber.demo",
+            hashed_password=demo_password_hash,
+            role="TEACHER"
+        )
+        admin_user = User(
+            id="USR-ADM-001",
+            email="admin@rehber.demo",
+            hashed_password=demo_password_hash,
+            role="ADMIN"
+        )
+        student_user_1 = User(
+            id="USR-STU-001",
+            email="student1@rehber.demo",
+            hashed_password=demo_password_hash,
+            role="STUDENT"
+        )
+        db.add_all([teacher_user, admin_user, student_user_1])
+
         # 1. School & Teacher
         school = School(
             id="SCH-001",
@@ -31,6 +55,7 @@ async def seed():
 
         teacher = Teacher(
             id="TEA-001",
+            user_id="USR-TEA-001",
             school_id="SCH-001",
             name="Teacher Parveen Akhtar",
             subject_specialty="Mathematics & Science"
@@ -41,6 +66,7 @@ async def seed():
         students = [
             Student(
                 id="STU101",
+                user_id="USR-STU-001",
                 school_id="SCH-001",
                 name="Amina Khan",
                 grade=6,
@@ -90,6 +116,13 @@ async def seed():
         ]
         for s in students:
             db.add(s)
+
+        registry_1 = StudentRegistry(
+            government_school_student_id="GOV-SCH-001-STU-0001",
+            student_name="Amina Khan",
+            linked_user_id="USR-STU-001"
+        )
+        db.add(registry_1)
 
         # 3. Subjects
         sub_math = Subject(
