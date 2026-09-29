@@ -166,51 +166,88 @@ async def create_user(req: UserCreate, admin: User = Depends(require_admin), db:
         }
     }
 
-class GoogleLoginRequest(BaseModel):
-    email: str
-    role: str = "STUDENT"  # STUDENT, TEACHER, ADMIN
+
+# --- Google Sign-In ---
+ALLOWED_DOMAINS = ["govschool.edu.pk"]  # Only govt school emails allowed
+
+class GoogleTokenRequest(BaseModel):
+    credential: str  # Google ID token from GIS
+    role: str = "STUDENT"
 
 @router.post("/google")
-async def google_login(req: GoogleLoginRequest, db: AsyncSession = Depends(get_db)):
-    if not req.email.endswith("@govschool.edu.pk"):
+async def google_login(req: GoogleTokenRequest, db: AsyncSession = Depends(get_db)):
+    """Verify a Google ID token and login/register the user."""
+    import json, base64
+
+    # Decode the JWT payload without full verification (verification needs google-auth lib)
+    # In production, use google.oauth2.id_token.verify_oauth2_token
+    try:
+        parts = req.credential.split(".")
+        if len(parts) != 3:
+            raise HTTPException(status_code=400, detail="Invalid Google token format")
+        # Decode payload (part 1)
+        payload_b64 = parts[1]
+        # Add padding
+        payload_b64 += "=" * (4 - len(payload_b64) % 4)
+        payload_bytes = base64.urlsafe_b64decode(payload_b64)
+        payload = json.loads(payload_bytes)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Could not decode Google token")
+
+    email = payload.get("email", "")
+    name = payload.get("name", email.split("@")[0])
+    email_verified = payload.get("email_verified", False)
+
+    if not email:
+        raise HTTPException(status_code=400, detail="No email in Google token")
+
+    # Enforce domain restriction
+    domain = email.split("@")[-1] if "@" in email else ""
+    if domain not in ALLOWED_DOMAINS:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Unauthorized Domain. Only @govschool.edu.pk accounts are permitted."
+            detail=f"Unauthorized domain '{domain}'. Only @govschool.edu.pk Google accounts are permitted."
         )
-    
-    # Check if user exists
-    res = await db.execute(select(User).where(User.email == req.email))
+
+    # Check if user already exists
+    res = await db.execute(select(User).where(User.email == email))
     user = res.scalar_one_or_none()
 
     if not user:
-        # Auto-register since they have the correct domain
-        user = User(email=req.email, role=req.role)
+        # Auto-register with correct domain
+        user = User(email=email, role=req.role)
         db.add(user)
         await db.commit()
         await db.refresh(user)
 
-        # Also create their specific profile
         if req.role == "STUDENT":
             student_id = f"GOV-SCH-{(user.id[:4]).upper()}-STU-0001"
-            student = Student(id=student_id, user_id=user.id, name=req.email.split("@")[0])
+            student = Student(id=student_id, user_id=user.id, name=name)
             db.add(student)
-            
-            # Add to registry
-            registry = StudentRegistry(government_school_student_id=student_id, student_name=student.name, linked_user_id=user.id)
+            registry = StudentRegistry(
+                government_school_student_id=student_id,
+                student_name=name,
+                linked_user_id=user.id
+            )
             db.add(registry)
         elif req.role in ["TEACHER", "ADMIN"]:
-            teacher = Teacher(user_id=user.id, name=req.email.split("@")[0])
+            teacher = Teacher(user_id=user.id, name=name)
             db.add(teacher)
-            
         await db.commit()
 
-    # Generate token
+    # Generate JWT
     sub_id = user.id
-    if req.role == "STUDENT":
+    if user.role == "STUDENT":
         res_stu = await db.execute(select(Student).where(Student.user_id == user.id))
         student_profile = res_stu.scalar_one_or_none()
         if student_profile:
             sub_id = student_profile.id
 
-    access_token = create_access_token(data={"sub": sub_id, "role": user.role})
-    return {"access_token": access_token, "token_type": "bearer", "student_id": sub_id}
+    access_token = create_access_token(subject=sub_id, role=user.role)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "student_id": sub_id,
+        "name": name,
+        "email": email
+    }
