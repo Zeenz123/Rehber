@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import Link from 'next/link';
+import LogoutButton from './LogoutButton';
 
 export const metadata: Metadata = {
   title: 'Rehber Educator Portal',
@@ -53,6 +54,7 @@ export default function RootLayout({
                 <Link href="/sync-monitor" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-800 transition">
                   Sync Monitor
                 </Link>
+                <LogoutButton />
               </div>
 
               <div className="flex items-center space-x-3 text-xs text-slate-300">
@@ -73,3 +75,6 @@ export default function RootLayout({
     </html>
   );
 }
+
+
+

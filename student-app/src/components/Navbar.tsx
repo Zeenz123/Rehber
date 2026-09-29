@@ -419,6 +419,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </button>
 
+          {/* Logout Button */}
+          <button
+            onClick={() => { localStorage.removeItem('student_token'); window.location.reload(); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-red-50 text-red-600 hover:bg-red-100"
+          >
+            <span className="hidden sm:inline">Logout</span>
+          </button>
+
           {/* Teacher Dashboard Switch */}
           <button
             onClick={() => onTabChange(currentTab === 'teacher' ? 'home' : 'teacher')}
@@ -444,3 +452,4 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+
