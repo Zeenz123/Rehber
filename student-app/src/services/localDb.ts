@@ -908,24 +908,28 @@ class LocalDatabase {
   joinAsStudent(
     name: string,
     grade: number = 7,
-    avatar?: string
+    avatar?: string,
+    governmentStudentId?: string
   ): { user: User; profile: LearnerProfile } {
     const trimmedName = name.trim();
     const all = this.getAllStudents();
 
     // Check if student with this name already exists
     const existing = all.find(
-      (u) => u.name.toLowerCase() === trimmedName.toLowerCase()
+      (u) =>
+        u.name.toLowerCase() === trimmedName.toLowerCase() ||
+        (governmentStudentId && u.governmentStudentId === governmentStudentId)
     );
     if (existing) {
       if (grade && existing.grade !== grade) existing.grade = grade;
       if (avatar && existing.avatar !== avatar) existing.avatar = avatar;
+      if (governmentStudentId && !existing.governmentStudentId) existing.governmentStudentId = governmentStudentId;
       this.setItem('all_students', all);
       return this.switchStudent(existing.id);
     }
 
     // Create unique new student
-    const newId = `student-${trimmedName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now().toString().slice(-4)}`;
+    const newId = governmentStudentId || `student-${trimmedName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now().toString().slice(-4)}`;
     const defaultAvatars = ['👦🏽', '👧🏽', '👦🏾', '👧🏾', '🧑🏻', '👧🏻', '🌟', '🚀', '🦁', '🦉', '🌻'];
     const chosenAvatar =
       avatar || defaultAvatars[Math.floor(Math.random() * defaultAvatars.length)];
@@ -939,6 +943,7 @@ class LocalDatabase {
       avatar: chosenAvatar,
       schoolId: 'school-rampur-01',
       hubId: 'hub-solar-node-04',
+      governmentStudentId: governmentStudentId || undefined,
     };
 
     // Create personalized profile for this student

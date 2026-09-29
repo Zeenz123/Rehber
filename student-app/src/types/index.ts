@@ -63,6 +63,7 @@ export interface User {
   avatar: string;
   schoolId: string;
   hubId: string;
+  governmentStudentId?: string;
 }
 
 export interface Subject {
