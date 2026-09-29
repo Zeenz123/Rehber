@@ -23,12 +23,12 @@ export default async function DashboardPage() {
         </div>
         <div className="flex items-center gap-3">
           <a
-            href="http://localhost:3000"
+            href={process.env.NEXT_PUBLIC_STUDENT_APP_URL || "http://localhost:3000"}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center px-3.5 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white shadow-sm text-xs font-bold rounded-lg transition"
           >
-            Launch Student App (Port 3000)
+            Launch Student App
           </a>
           <Link
             href="/sms-gateway"
