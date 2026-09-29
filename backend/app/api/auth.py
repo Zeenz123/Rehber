@@ -168,7 +168,10 @@ async def create_user(req: UserCreate, admin: User = Depends(require_admin), db:
 
 
 # --- Google Sign-In ---
-ALLOWED_DOMAINS = ["govschool.edu.pk"]  # Only govt school emails allowed
+def get_allowed_domains() -> list:
+    import os
+    raw = os.getenv("ALLOWED_DOMAINS", "govschool.edu.pk,gmail.com")
+    return [d.strip().lower() for d in raw.split(",") if d.strip()]
 
 class GoogleTokenRequest(BaseModel):
     credential: str  # Google ID token from GIS
@@ -179,8 +182,7 @@ async def google_login(req: GoogleTokenRequest, db: AsyncSession = Depends(get_d
     """Verify a Google ID token and login/register the user."""
     import json, base64
 
-    # Decode the JWT payload without full verification (verification needs google-auth lib)
-    # In production, use google.oauth2.id_token.verify_oauth2_token
+    # Decode the JWT payload without full verification
     try:
         parts = req.credential.split(".")
         if len(parts) != 3:
@@ -194,19 +196,20 @@ async def google_login(req: GoogleTokenRequest, db: AsyncSession = Depends(get_d
     except Exception:
         raise HTTPException(status_code=400, detail="Could not decode Google token")
 
-    email = payload.get("email", "")
-    name = payload.get("name", email.split("@")[0])
+    email = payload.get("email", "").lower()
+    name = payload.get("name", email.split("@")[0] if "@" in email else "User")
     email_verified = payload.get("email_verified", False)
 
     if not email:
         raise HTTPException(status_code=400, detail="No email in Google token")
 
     # Enforce domain restriction
-    domain = email.split("@")[-1] if "@" in email else ""
-    if domain not in ALLOWED_DOMAINS:
+    domain = email.split("@")[-1].lower() if "@" in email else ""
+    allowed = get_allowed_domains()
+    if domain not in allowed and "*" not in allowed:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Unauthorized domain '{domain}'. Only @govschool.edu.pk Google accounts are permitted."
+            detail=f"Unauthorized domain '@{domain}'. Permitted domains: {', '.join(['@' + d for d in allowed])}"
         )
 
     # Check if user already exists
