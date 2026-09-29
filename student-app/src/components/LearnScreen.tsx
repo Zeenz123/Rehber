@@ -21,6 +21,7 @@ import { Lesson, Topic, Subject } from '../types';
 import { localDb } from '../services/localDb';
 import { voiceService } from '../services/voiceService';
 import { getLanguage, t } from '../services/i18n';
+import { AdBanner } from './AdBanner';
 
 interface LearnScreenProps {
   initialLessonId?: string;
