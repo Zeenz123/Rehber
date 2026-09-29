@@ -1079,6 +1079,33 @@ class LocalDatabase {
     return { user: newUser, profile: newProfile };
   }
 
+  removeStudent(studentId: string): { remainingStudents: User[]; activeUser: User } {
+    let all = this.getAllStudents();
+    all = all.filter((s) => s.id !== studentId);
+    this.setItem('all_students', all);
+
+    // Clean up stored profile
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(DB_PREFIX + 'profile_' + studentId);
+    }
+
+    // If active student was deleted, switch to another student
+    const currentUser = this.getUser();
+    let activeUser: User = currentUser || DEFAULT_USER;
+    if (currentUser?.id === studentId) {
+      if (all.length > 0) {
+        const switched = this.switchStudent(all[0].id);
+        activeUser = switched.user;
+      } else {
+        const fallback = this.switchStudent(DEFAULT_USER.id);
+        activeUser = fallback.user;
+      }
+    }
+
+    this.notifyListeners();
+    return { remainingStudents: all, activeUser };
+  }
+
   // Learner Profile & Progress
   getProfile(): LearnerProfile {
     return this.getItem<LearnerProfile>('profile', INITIAL_PROFILE);

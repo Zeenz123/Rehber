@@ -9,6 +9,7 @@ import {
   Award,
   ArrowRight,
   BookOpen,
+  Trash2,
 } from 'lucide-react';
 import { localDb } from '../services/localDb';
 import { User, LearnerProfile } from '../types';
@@ -115,6 +116,27 @@ export const JoinStudentModal: React.FC<JoinStudentModalProps> = ({
       }, 700);
     } catch (err: any) {
       setErrorMsg('Could not switch student: ' + err.message);
+    }
+  };
+
+  const handleRemoveStudent = (studentId: string, studentName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm(`Are you sure you want to remove ${studentName} from this tablet?`)) {
+      return;
+    }
+
+    try {
+      const { remainingStudents, activeUser } = localDb.removeStudent(studentId);
+      setStudents(remainingStudents);
+      setCurrentUser(activeUser);
+      setSuccessMsg(`Student ${studentName} was removed from this tablet.`);
+      setErrorMsg(null);
+      if (onStudentChanged && activeUser) {
+        const activeProfile = localDb.getStudentProfile(activeUser.id);
+        onStudentChanged(activeUser, activeProfile);
+      }
+    } catch (err: any) {
+      setErrorMsg('Could not remove student: ' + err.message);
     }
   };
 
@@ -321,6 +343,14 @@ export const JoinStudentModal: React.FC<JoinStudentModalProps> = ({
                         </div>
                       </div>
                       {isActive && <Check className="w-4 h-4 text-orange-600 shrink-0" />}
+                      <span
+                        role="button"
+                        title={`Remove ${student.name}`}
+                        onClick={(e) => handleRemoveStudent(student.id, student.name, e)}
+                        className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer ml-0.5"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </span>
                     </div>
                   </button>
                 );
