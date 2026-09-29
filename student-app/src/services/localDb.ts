@@ -1128,26 +1128,21 @@ class LocalDatabase {
 
   // Curriculum
   getSubjects(): Subject[] {
-    return this.getItem<Subject[]>('subjects', INITIAL_SUBJECTS);
+    return INITIAL_SUBJECTS;
   }
 
   addSubject(subject: Subject): void {
-    const subjects = this.getSubjects();
-    subjects.push(subject);
-    this.setItem('subjects', subjects);
-    if (this.idb.isAvailable) {
-      this.idb.put(IDB_STORES.SYSTEM_STATE, { key: 'subjects_cache', data: subjects });
-    }
-    this.notifyListeners();
+    // Disabling runtime additions for static curriculum prototype
+    console.warn("addSubject called but curriculum is static");
   }
 
   getTopics(subjectId?: string): Topic[] {
-    const all = this.getItem<Topic[]>('topics', INITIAL_TOPICS);
+    const all = INITIAL_TOPICS;
     return subjectId ? all.filter((t) => t.subjectId === subjectId) : all;
   }
 
   getLessons(topicId?: string): Lesson[] {
-    const all = this.getItem<Lesson[]>('lessons', INITIAL_LESSONS);
+    const all = INITIAL_LESSONS;
     return topicId ? all.filter((l) => l.topicId === topicId) : all;
   }
 
@@ -1157,7 +1152,7 @@ class LocalDatabase {
   }
 
   getQuestions(topicId?: string, limit?: number): Question[] {
-    const all = this.getItem<Question[]>('questions', INITIAL_QUESTIONS);
+    const all = INITIAL_QUESTIONS;
     const filtered = topicId ? all.filter((q) => q.topicId === topicId) : all;
     return limit ? filtered.slice(0, limit) : filtered;
   }
