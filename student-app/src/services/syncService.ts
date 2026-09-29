@@ -119,8 +119,8 @@ class SyncService {
             created_at: r.timestamp || new Date().toISOString(),
           })),
         };
-
-        const fRes = await fetch('http://localhost:8000/api/sync/batch', {
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const fRes = await fetch(`${apiBase}/api/sync/batch`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(fastApiPayload),

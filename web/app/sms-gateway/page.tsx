@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { fetchSmsLogs, sendTeacherSms, SmsLogApiItem } from '@/lib/api';
+import { fetchSmsLogs, sendTeacherSms, SmsLogApiItem, API_BASE_URL } from '@/lib/api';
 import { webEcosystemBridge, EcosystemEvent } from '@/lib/ecosystemBridge';
 
 interface SmsLogItem {
@@ -142,7 +142,7 @@ export default function SmsGatewayPage() {
     setFeedback(null);
 
     try {
-      const res = await fetch('http://localhost:8000/api/sms/webhook', {
+      const res = await fetch(`${API_BASE_URL}/sms/webhook`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

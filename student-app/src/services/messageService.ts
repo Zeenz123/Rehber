@@ -129,8 +129,9 @@ class MessageService {
       const parsed = SmsProtocol.parse(rawPayload);
 
       // Attempt sending to FastAPI backend or local server webhook
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const endpoints = [
-        'http://localhost:8000/api/sms/webhook',
+        `${apiBase}/api/sms/webhook`,
         '/api/sms/webhook',
       ];
 
